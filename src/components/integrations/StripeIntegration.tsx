@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -27,7 +27,6 @@ export function StripeIntegration({ onStatusChange }: StripeIntegrationProps) {
   const [status, setStatus] = useState<'connected' | 'disconnected' | 'error' | 'testing'>('disconnected')
   const [showKeys, setShowKeys] = useState(false)
   const [testing, setTesting] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [stats, setStats] = useState({
     totalCustomers: 0,
     totalRevenue: 0,

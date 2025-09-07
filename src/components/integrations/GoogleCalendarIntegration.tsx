@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -12,9 +12,7 @@ import {
   EyeOff,
   ExternalLink,
   Clock,
-  Users,
-  MapPin,
-  Bell
+  Users
 } from 'lucide-react'
 import { GoogleCalendarService } from '@/services/integrations/GoogleCalendarService'
 import { notifications } from '@/lib/notifications'
@@ -27,7 +25,6 @@ export function GoogleCalendarIntegration({ onStatusChange }: GoogleCalendarInte
   const [status, setStatus] = useState<'connected' | 'disconnected' | 'error' | 'testing'>('disconnected')
   const [showKeys, setShowKeys] = useState(false)
   const [testing, setTesting] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [authenticated, setAuthenticated] = useState(false)
   const [stats, setStats] = useState({
     totalEvents: 0,

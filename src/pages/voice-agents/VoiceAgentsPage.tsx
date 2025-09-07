@@ -116,7 +116,7 @@ export function VoiceAgentsPage() {
       setLoadingVapi(true)
       const [agentsResponse, callsResponse] = await Promise.all([
         vapiService.getVoiceAgents(),
-        vapiService.getCallHistory('', 20)
+        vapiService.getCallHistory('all')
       ])
       
       if (agentsResponse.success && agentsResponse.data) {

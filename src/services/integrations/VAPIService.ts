@@ -270,13 +270,25 @@ class VAPIServiceClass {
         phoneNumber: agent.phoneNumberId || '',
         status: agent.status || 'inactive',
         script: agent.initialMessage || '',
+        type: agent.type || 'custom',
+        model: agent.model || 'gpt-4',
+        voice: agent.voice || 'alloy',
+        maxDuration: agent.maxDuration || 300,
+        language: agent.language || 'en',
+        temperature: agent.temperature || 0.7,
+        maxTokens: agent.maxTokens || 1000,
         performanceMetrics: {
           totalCalls: agent.callCount || 0,
           answeredCalls: agent.answeredCallCount || 0,
           missedCalls: (agent.callCount || 0) - (agent.answeredCallCount || 0),
           averageDuration: agent.averageCallDuration || 0,
-          customerSatisfaction: agent.customerSatisfaction || 0
-        }
+          customerSatisfaction: agent.customerSatisfaction || 0,
+          conversionRate: agent.conversionRate || 0,
+          successRate: agent.successRate || 0
+        },
+        vapiAgentId: agent.id,
+        createdAt: agent.createdAt || new Date().toISOString(),
+        updatedAt: agent.updatedAt || new Date().toISOString()
       }))
 
       return {
@@ -300,13 +312,25 @@ class VAPIServiceClass {
         phoneNumber: agent.phoneNumberId || '',
         status: agent.status || 'inactive',
         script: agent.initialMessage || '',
+        type: agent.type || 'custom',
+        model: agent.model || 'gpt-4',
+        voice: agent.voice || 'alloy',
+        maxDuration: agent.maxDuration || 300,
+        language: agent.language || 'en',
+        temperature: agent.temperature || 0.7,
+        maxTokens: agent.maxTokens || 1000,
         performanceMetrics: {
           totalCalls: agent.callCount || 0,
           answeredCalls: agent.answeredCallCount || 0,
           missedCalls: (agent.callCount || 0) - (agent.answeredCallCount || 0),
           averageDuration: agent.averageCallDuration || 0,
-          customerSatisfaction: agent.customerSatisfaction || 0
-        }
+          customerSatisfaction: agent.customerSatisfaction || 0,
+          conversionRate: agent.conversionRate || 0,
+          successRate: agent.successRate || 0
+        },
+        vapiAgentId: agent.id,
+        createdAt: agent.createdAt || new Date().toISOString(),
+        updatedAt: agent.updatedAt || new Date().toISOString()
       }
 
       return {
@@ -399,6 +423,19 @@ class VAPIServiceClass {
     }
 
     return response
+  }
+
+  async getCallHistory(agentId: string): Promise<VAPIResponse<CallLog[]>> {
+    return this.makeRequest<CallLog[]>(`/assistant/${agentId}/calls`)
+  }
+
+  async makeCall(agentId: string, phoneNumber: string): Promise<VAPIResponse<{ callId: string }>> {
+    return this.makeRequest<{ callId: string }>('/call', {
+      assistantId: agentId,
+      customer: {
+        number: phoneNumber
+      }
+    })
   }
 
   get isEnabled(): boolean {

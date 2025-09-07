@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
 
 // Components
-import { LoadingPage } from '@/components/ui/LoadingSpinner'
+import { LoadingPage } from '@/components/ui/Loading'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { MaintenanceMode } from '@/components/MaintenanceMode'
 import { Layout } from '@/components/layout/Layout'
@@ -29,7 +29,7 @@ const VoiceAgentsPage = React.lazy(() => import('@/pages/voice-agents/VoiceAgent
 const FinancialsPage = React.lazy(() => import('@/pages/financials/FinancialsPage').then(m => ({ default: m.FinancialsPage })))
 const AnalyticsPage = React.lazy(() => import('@/pages/analytics/AnalyticsPage').then(m => ({ default: m.AnalyticsPage })))
 const IntegrationsPage = React.lazy(() => import('@/pages/integrations/IntegrationsPage').then(m => ({ default: m.IntegrationsPage })))
-const PhoneNumbersPage = React.lazy(() => import('@/pages/phone-numbers/PhoneNumbersPage').then(m => ({ default: m.PhoneNumbersPage })))
+const PhoneNumbersPage = React.lazy(() => import('@/pages/phone-numbers/PhoneNumbersPage'))
 const SettingsPage = React.lazy(() => import('@/pages/SettingsPage').then(m => ({ default: m.SettingsPage })))
 
 // Enhanced QueryClient with better caching and error handling

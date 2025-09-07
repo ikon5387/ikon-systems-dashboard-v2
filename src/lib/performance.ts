@@ -146,6 +146,11 @@ export class PerformanceMonitor {
       this.endTiming(name)
     })
   }
+
+  logError(error: any): void {
+    console.error('Performance Monitor - Error logged:', error)
+    // In a real application, you would send this to an error tracking service
+  }
 }
 
 /**

@@ -23,7 +23,7 @@ import {
   FiPhone,
   FiMail
 } from 'react-icons/fi'
-import { format, isToday, isTomorrow, isThisWeek, isPast } from 'date-fns'
+import { format, isToday as dateFnsIsToday, isTomorrow, isThisWeek, isPast } from 'date-fns'
 import toast from 'react-hot-toast'
 
 interface AppointmentWithClient {
@@ -140,7 +140,7 @@ export function AppointmentsPage() {
     const appointmentDate = new Date(appointment.date_time)
     let matchesDate = true
     if (dateFilter === 'today') {
-      matchesDate = isToday(appointmentDate)
+      matchesDate = dateFnsIsToday(appointmentDate)
     } else if (dateFilter === 'tomorrow') {
       matchesDate = isTomorrow(appointmentDate)
     } else if (dateFilter === 'this_week') {
@@ -207,7 +207,7 @@ export function AppointmentsPage() {
   }
 
   const isToday = (scheduledAt: string) => {
-    return isToday(new Date(scheduledAt))
+    return dateFnsIsToday(new Date(scheduledAt))
   }
 
   // Effects
@@ -551,7 +551,7 @@ export function AppointmentsPage() {
     {/* Edit Appointment Form Modal */}
     {editingAppointment && (
       <AppointmentForm
-        appointment={editingAppointment}
+        appointment={editingAppointment as any}
         onSave={handleUpdateAppointment}
         onCancel={() => setEditingAppointment(null)}
         isLoading={updateAppointmentMutation.isPending}

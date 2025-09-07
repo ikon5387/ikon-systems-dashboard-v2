@@ -128,7 +128,11 @@ export function FinancialsPage() {
 
   const createStripePaymentIntent = async (amount: number, customerId?: string) => {
     try {
-      const response = await stripeService.createPaymentIntent(amount, 'usd', customerId)
+      const response = await stripeService.createPaymentIntent({
+        amount: amount * 100, // Convert to cents
+        currency: 'usd',
+        customerId: customerId
+      })
       if (response.success) {
         notifications.success('Payment intent created successfully')
         return response.data
@@ -142,7 +146,10 @@ export function FinancialsPage() {
 
   const createStripeCustomer = async (email: string, name?: string) => {
     try {
-      const response = await stripeService.createCustomer(email, name)
+      const response = await stripeService.createCustomer({
+        email,
+        name
+      })
       if (response.success) {
         notifications.success('Customer created successfully')
         loadStripeData() // Refresh data
