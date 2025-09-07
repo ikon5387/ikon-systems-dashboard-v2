@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ikon-systems-app
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ikon-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ikon-app.rule=Host(`app.ikonsystemsai.com`)"
+      - "traefik.http.routers.ikon-app.tls=true"
+      - "traefik.http.routers.ikon-app.tls.certresolver=letsencrypt"
+      - "traefik.http.services.ikon-app.loadbalancer.server.port=8080"
+
+  # Reverse proxy with automatic SSL
+  traefik:
+    image: traefik:v3.0
+    container_name: ikon-traefik
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=admin@ikonsystemsai.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      # Redirect HTTP to HTTPS
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+    restart: unless-stopped
+    networks:
+      - ikon-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.ikonsystemsai.com`)"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik.service=api@internal"
+
+  # Optional: Database backup service
+  backup:
+    image: postgres:15-alpine
+    container_name: ikon-backup
+    environment:
+      - PGPASSWORD=${POSTGRES_PASSWORD:-}
+    volumes:
+      - ./backups:/backups
+      - ./scripts/backup.sh:/backup.sh
+    command: ["sh", "-c", "while true; do sleep 86400; /backup.sh; done"]
+    restart: unless-stopped
+    networks:
+      - ikon-network
+    profiles:
+      - backup
+
+networks:
+  ikon-network:
+    driver: bridge

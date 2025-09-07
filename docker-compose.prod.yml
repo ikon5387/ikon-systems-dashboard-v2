@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
+    container_name: ikon-systems-app-prod
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "80:8080"
+      - "443:8443"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ikon-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ikon-app.rule=Host(`app.ikonsystemsai.com`)"
+      - "traefik.http.routers.ikon-app.entrypoints=websecure"
+      - "traefik.http.routers.ikon-app.tls.certresolver=letsencrypt"
+      - "traefik.http.services.ikon-app.loadbalancer.server.port=8080"
+
+  traefik:
+    image: traefik:v2.10
+    container_name: ikon-traefik
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=contact@ikonsystemsai.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"  # Traefik dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/letsencrypt
+    networks:
+      - ikon-network
+    restart: unless-stopped
+
+networks:
+  ikon-network:
+    driver: bridge
+
+volumes:
+  letsencrypt:
