@@ -13,6 +13,7 @@ import {
 } from 'react-icons/fi'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
+import { Logo } from '@/components/ui/Logo'
 
 interface SidebarProps {
   isOpen: boolean
@@ -94,22 +95,13 @@ export function Sidebar({ isOpen, onClose, isCollapsed = false }: SidebarProps) 
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-200 ease-in-out lg:hidden ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
-        <div className="flex items-center justify-between h-16 px-6 border-b border-slate-200 dark:border-slate-700">
-          <div className="flex flex-col items-center">
-            <pre className="text-xs font-mono text-primary leading-tight">
-{`╔╦╗╔═╗╔╗╔╔═╗╔═╗╔═╗╦═╗
- ║ ║╣ ║║║║  ║╣ ║ ║╠╦╝
- ╩ ╚═╝╝╚╝╚═╝╚═╝╚═╝╩╚═`}
-            </pre>
-            <div className="text-sm font-semibold text-foreground mt-1">
-              IKON SYSTEMS
-            </div>
-          </div>
+        <div className="flex items-center justify-between h-16 px-6 border-b border-border">
+          <Logo size="sm" />
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+            className="text-muted-foreground hover:text-foreground hover:bg-muted"
           >
             <FiX className="w-5 h-5" />
           </Button>
@@ -128,18 +120,18 @@ export function Sidebar({ isOpen, onClose, isCollapsed = false }: SidebarProps) 
                   onClick={onClose}
                   className={`group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200 ${
                     isActive
-                      ? 'bg-primary text-white'
-                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-foreground hover:bg-muted'
                   }`}
                 >
                   <item.icon
                     className={`mr-3 w-5 h-5 ${
-                      isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-500'
+                      isActive ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-foreground'
                     }`}
                   />
                   {item.name}
                   {item.badge && (
-                    <Badge className="ml-auto bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 text-xs">
+                    <Badge className="ml-auto text-xs">
                       {item.badge}
                     </Badge>
                   )}
@@ -153,23 +145,12 @@ export function Sidebar({ isOpen, onClose, isCollapsed = false }: SidebarProps) 
       {/* Desktop sidebar */}
       <div className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 ${isCollapsed ? 'lg:w-16' : 'lg:w-64'}`}>
         <div className="flex flex-col flex-grow bg-card border-r border-border">
-          {/* ASCII Logo */}
+          {/* Logo */}
           <div className={`flex items-center justify-center h-20 px-6 border-b border-border ${isCollapsed ? 'px-2' : ''}`}>
             {isCollapsed ? (
-              <div className="text-center">
-                <div className="text-lg font-bold text-primary">I</div>
-              </div>
+              <Logo variant="icon" size="md" />
             ) : (
-              <div className="text-center">
-                <pre className="text-xs font-mono text-primary leading-tight">
-{`╔╦╗╔═╗╔╗╔╔═╗╔═╗╔═╗╦═╗
- ║ ║╣ ║║║║  ║╣ ║ ║╠╦╝
- ╩ ╚═╝╝╚╝╚═╝╚═╝╚═╝╩╚═`}
-                </pre>
-                <div className="text-sm font-semibold text-foreground mt-1">
-                  IKON SYSTEMS
-                </div>
-              </div>
+              <Logo size="md" />
             )}
           </div>
 
@@ -187,8 +168,8 @@ export function Sidebar({ isOpen, onClose, isCollapsed = false }: SidebarProps) 
                     isCollapsed ? 'px-2 py-3 justify-center' : 'px-3 py-2'
                   } ${
                     isActive
-                      ? 'bg-primary text-white shadow-lg'
-                      : 'text-foreground hover:bg-muted hover:text-foreground hover:shadow-sm'
+                      ? 'bg-primary text-primary-foreground shadow-lg'
+                      : 'text-foreground hover:bg-muted hover:shadow-sm'
                   }`}
                   title={isCollapsed ? item.name : undefined}
                 >
@@ -196,7 +177,7 @@ export function Sidebar({ isOpen, onClose, isCollapsed = false }: SidebarProps) 
                     className={`w-5 h-5 transition-colors duration-200 ${
                       isCollapsed ? '' : 'mr-3'
                     } ${
-                      isActive ? 'text-white' : 'text-muted-foreground group-hover:text-foreground'
+                      isActive ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-foreground'
                     }`}
                   />
                   {!isCollapsed && (
@@ -205,7 +186,7 @@ export function Sidebar({ isOpen, onClose, isCollapsed = false }: SidebarProps) 
                       {item.badge && (
                         <Badge className={`ml-auto text-xs ${
                           isActive 
-                            ? 'bg-white/20 text-white' 
+                            ? 'bg-primary-foreground/20 text-primary-foreground' 
                             : 'bg-muted text-muted-foreground'
                         }`}>
                           {item.badge}

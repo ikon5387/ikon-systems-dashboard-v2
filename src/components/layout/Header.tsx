@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Badge } from '@/components/ui/Badge'
+import { Logo } from '@/components/ui/Logo'
 import { useAuth } from '@/hooks/useAuth'
 import { useTheme } from '@/hooks/useTheme'
 
@@ -69,40 +70,43 @@ export function Header({ onSidebarToggle, onDesktopToggle }: HeaderProps) {
   ]
 
   return (
-    <header className="bg-background border-b border-border sticky top-0 z-30 shadow-sm">
+    <header className="bg-background/95 backdrop-blur-md border-b border-border sticky top-0 z-30 shadow-sm">
       <div className="px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Left side */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-6">
             <Button
               variant="ghost"
               size="sm"
               onClick={onSidebarToggle}
-              className="lg:hidden"
+              className="lg:hidden hover:bg-muted"
             >
               <FiMenu className="w-5 h-5" />
             </Button>
-            
+
             {/* Desktop sidebar toggle */}
             <Button
               variant="ghost"
               size="sm"
               onClick={onDesktopToggle}
-              className="hidden lg:flex"
+              className="hidden lg:flex hover:bg-muted"
             >
               <FiMenu className="w-5 h-5" />
             </Button>
 
+            {/* Logo */}
+            <Logo size="md" className="hidden sm:flex" />
+
             {/* Search */}
             <form onSubmit={handleSearch} className="hidden md:block">
               <div className="relative">
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
                   type="text"
                   placeholder="Search clients, projects..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-64 dark-input"
+                  className="input-enterprise pl-10 w-64"
                 />
               </div>
             </form>
@@ -116,7 +120,7 @@ export function Header({ onSidebarToggle, onDesktopToggle }: HeaderProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowThemeMenu(!showThemeMenu)}
-                className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+                className="text-muted-foreground hover:text-foreground hover:bg-muted"
               >
                 {theme === 'light' && <FiSun className="w-4 h-4" />}
                 {theme === 'dark' && <FiMoon className="w-4 h-4" />}
@@ -124,7 +128,7 @@ export function Header({ onSidebarToggle, onDesktopToggle }: HeaderProps) {
               </Button>
 
               {showThemeMenu && (
-                <div className="absolute right-0 mt-2 w-48 dark-modal rounded-lg shadow-lg py-1 z-50">
+                <div className="absolute right-0 mt-2 w-48 bg-popover border border-border rounded-xl shadow-lg py-1 z-50">
                   {themeOptions.map((option) => (
                     <button
                       key={option.value}
@@ -132,10 +136,10 @@ export function Header({ onSidebarToggle, onDesktopToggle }: HeaderProps) {
                         setTheme(option.value as any)
                         setShowThemeMenu(false)
                       }}
-                      className={`w-full flex items-center px-4 py-2 text-sm text-left hover:bg-slate-50 dark:hover:bg-slate-700 ${
+                      className={`w-full flex items-center px-4 py-2 text-sm text-left hover:bg-muted rounded-lg mx-1 ${
                         theme === option.value
                           ? 'text-primary bg-primary/10'
-                          : 'text-slate-700 dark:text-slate-300'
+                          : 'text-foreground'
                       }`}
                     >
                       <option.icon className="w-4 h-4 mr-3" />
@@ -150,10 +154,10 @@ export function Header({ onSidebarToggle, onDesktopToggle }: HeaderProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="relative text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+              className="relative text-muted-foreground hover:text-foreground hover:bg-muted"
             >
               <FiBell className="w-4 h-4" />
-              <Badge className="absolute -top-1 -right-1 w-5 h-5 text-xs bg-red-500 text-white">
+              <Badge className="absolute -top-1 -right-1 w-5 h-5 text-xs bg-destructive text-destructive-foreground">
                 3
               </Badge>
             </Button>
@@ -163,10 +167,10 @@ export function Header({ onSidebarToggle, onDesktopToggle }: HeaderProps) {
               <Button
                 variant="ghost"
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center space-x-2 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
+                className="flex items-center space-x-2 text-foreground hover:bg-muted"
               >
-                <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-semibold">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/90 rounded-full flex items-center justify-center shadow-sm">
+                  <span className="text-primary-foreground text-sm font-semibold">
                     {user?.email?.charAt(0).toUpperCase() || 'U'}
                   </span>
                 </div>
@@ -174,7 +178,7 @@ export function Header({ onSidebarToggle, onDesktopToggle }: HeaderProps) {
                   <p className="text-sm font-medium">
                     {profile?.email?.split('@')[0] || 'User'}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 capitalize">
+                  <p className="text-xs text-muted-foreground capitalize">
                     {profile?.role || 'user'}
                   </p>
                 </div>
@@ -182,13 +186,13 @@ export function Header({ onSidebarToggle, onDesktopToggle }: HeaderProps) {
               </Button>
 
               {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-56 dark-modal rounded-lg shadow-lg py-1 z-50">
+                <div className="absolute right-0 mt-2 w-56 bg-popover border border-border rounded-xl shadow-lg py-1 z-50">
                   {/* User Info */}
-                  <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                  <div className="px-4 py-3 border-b border-border">
+                    <p className="text-sm font-medium text-foreground">
                       {profile?.email?.split('@')[0] || 'User'}
                     </p>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                    <p className="text-sm text-muted-foreground">
                       {user?.email}
                     </p>
                     <Badge className="mt-1 text-xs">
@@ -199,26 +203,26 @@ export function Header({ onSidebarToggle, onDesktopToggle }: HeaderProps) {
                   {/* Menu Items */}
                   <Link
                     to="/settings"
-                    className="flex items-center px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                    className="flex items-center px-4 py-2 text-sm text-foreground hover:bg-muted rounded-lg mx-1"
                     onClick={() => setShowUserMenu(false)}
                   >
                     <FiUser className="w-4 h-4 mr-3" />
                     Profile
                   </Link>
-                  
+
                   <Link
                     to="/settings"
-                    className="flex items-center px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
+                    className="flex items-center px-4 py-2 text-sm text-foreground hover:bg-muted rounded-lg mx-1"
                     onClick={() => setShowUserMenu(false)}
                   >
                     <FiSettings className="w-4 h-4 mr-3" />
                     Settings
                   </Link>
 
-                  <div className="border-t border-slate-200 dark:border-slate-700 mt-1">
+                  <div className="border-t border-border mt-1">
                     <button
                       onClick={handleSignOut}
-                      className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      className="flex items-center w-full px-4 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg mx-1"
                     >
                       <FiLogOut className="w-4 h-4 mr-3" />
                       Sign out

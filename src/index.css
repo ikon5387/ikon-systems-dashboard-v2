@@ -1,75 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Minimalist Design System */
+/* Enterprise Design System */
 :root {
-  /* Core Colors - Monochromatic */
-  --primary: 0 0% 9%;
+  /* Sophisticated Color Palette */
+  --primary: 220 14% 11%; /* Deep charcoal */
   --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 96%;
-  --secondary-foreground: 0 0% 9%;
-  --muted: 0 0% 96%;
-  --muted-foreground: 0 0% 45%;
-  --accent: 0 0% 96%;
-  --accent-foreground: 0 0% 9%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 90%;
-  --input: 0 0% 90%;
-  --ring: 0 0% 9%;
-  --background: 0 0% 100%;
-  --foreground: 0 0% 9%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 9%;
-  --radius: 0.375rem;
-  
-  /* Minimalist Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  
-  /* Toast variables */
-  --toast-bg: 0 0% 100%;
-  --toast-color: 0 0% 9%;
-  --toast-border: 0 0% 90%;
-}
-
-.dark {
-  /* Dark Minimalist Theme */
-  --primary: 0 0% 98%;
-  --primary-foreground: 0 0% 9%;
-  --secondary: 0 0% 15%;
+  --secondary: 220 13% 18%; /* Dark slate */
   --secondary-foreground: 0 0% 98%;
-  --muted: 0 0% 15%;
-  --muted-foreground: 0 0% 65%;
-  --accent: 0 0% 15%;
+  --muted: 220 13% 91%;
+  --muted-foreground: 220 9% 46%;
+  --accent: 220 13% 18%;
   --accent-foreground: 0 0% 98%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 20%;
-  --input: 0 0% 20%;
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 220 14% 11%;
+  --background: 0 0% 100%;
+  --foreground: 220 14% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 14% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 14% 11%;
+  --radius: 0.75rem;
+  
+  /* Professional Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+  --shadow-soft: 0 2px 15px -3px rgba(0, 0, 0, 0.03), 0 10px 20px -2px rgba(0, 0, 0, 0.02);
+  
+  /* Status Colors */
+  --success: 142 76% 36%;
+  --success-foreground: 0 0% 98%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 98%;
+  --error: 0 84% 60%;
+  --error-foreground: 0 0% 98%;
+  --info: 199 89% 48%;
+  --info-foreground: 0 0% 98%;
+  
+  /* Toast variables */
+  --toast-bg: 0 0% 100%;
+  --toast-color: 220 14% 11%;
+  --toast-border: 220 13% 91%;
+}
+
+.dark {
+  /* Dark Enterprise Theme */
+  --primary: 0 0% 98%;
+  --primary-foreground: 220 14% 11%;
+  --secondary: 220 13% 18%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 220 13% 18%;
+  --muted-foreground: 220 9% 64%;
+  --accent: 220 13% 18%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62% 30%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 220 13% 18%;
+  --input: 220 13% 18%;
   --ring: 0 0% 98%;
-  --background: 0 0% 9%;
+  --background: 220 14% 4%;
   --foreground: 0 0% 98%;
-  --card: 0 0% 12%;
+  --card: 220 14% 4%;
   --card-foreground: 0 0% 98%;
-  --popover: 0 0% 12%;
+  --popover: 220 14% 4%;
   --popover-foreground: 0 0% 98%;
   
   /* Dark Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 10px 10px -5px rgb(0 0 0 / 0.2);
+  --shadow-soft: 0 2px 15px -3px rgba(0, 0, 0, 0.2), 0 10px 20px -2px rgba(0, 0, 0, 0.1);
+  
+  /* Status Colors - Dark */
+  --success: 142 76% 36%;
+  --success-foreground: 0 0% 98%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 98%;
+  --error: 0 84% 60%;
+  --error-foreground: 0 0% 98%;
+  --info: 199 89% 48%;
+  --info-foreground: 0 0% 98%;
   
   /* Toast variables for dark mode */
-  --toast-bg: 0 0% 12%;
+  --toast-bg: 220 14% 4%;
   --toast-color: 0 0% 98%;
-  --toast-border: 0 0% 20%;
+  --toast-border: 220 13% 18%;
 }
 
 /* Base styles */
@@ -78,8 +104,13 @@
 }
 
 body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background-color: rgb(var(--background));
   color: rgb(var(--foreground));
+  line-height: 1.6;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
@@ -87,332 +118,245 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Typography System */
+.text-display {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.text-h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.text-h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.text-h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.text-h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.text-h5 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.text-h6 {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.text-body-lg {
+  font-size: 1.125rem;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.text-body {
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.text-body-sm {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.text-caption {
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgb(var(--muted));
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgb(var(--muted-foreground) / 0.3);
-  border-radius: 3px;
+  background: rgb(var(--muted-foreground) / 0.2);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--muted-foreground) / 0.5);
+  background: rgb(var(--muted-foreground) / 0.3);
 }
 
 /* Custom components */
 @layer components {
-    /* Minimalist Text Styles */
-    .text-primary {
-      @apply text-gray-900 dark:text-gray-100;
-    }
-  
-  .text-muted {
-    @apply text-muted-foreground;
+  /* Professional Card Styles */
+  .enterprise-card {
+    @apply bg-card border border-border rounded-xl shadow-soft;
   }
   
-  /* Clean Card Effects */
-  .card-hover {
-    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
+  .enterprise-card-hover {
+    @apply enterprise-card transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
   }
   
-  /* Subtle Button Effects */
-  .button-subtle {
-    @apply transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5;
+  /* Professional Button Styles */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
   }
   
-  /* Clean Hover Effects */
-  .hover-lift {
-    @apply transition-transform duration-200 hover:-translate-y-0.5;
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2;
   }
   
+  .btn-ghost {
+    @apply bg-transparent text-foreground px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+  }
+  
+  /* Professional Input Styles */
+  .input-enterprise {
+    @apply w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200;
+  }
+  
+  /* Sidebar Styles */
   .sidebar-item {
-    @apply flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200;
+    @apply flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200;
   }
   
   .sidebar-item.active {
-    @apply bg-primary text-white;
+    @apply bg-primary text-primary-foreground shadow-sm;
   }
   
   .sidebar-item:not(.active) {
-    @apply text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-100;
+    @apply text-muted-foreground hover:bg-muted hover:text-foreground;
   }
   
-  /* Minimalist Dark Theme Components */
-  .dark-card {
-    @apply bg-card border border-border;
+  /* Status Badges */
+  .badge-success {
+    @apply bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300 px-2 py-1 rounded-md text-xs font-medium;
   }
   
-  .dark-input {
-    @apply bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:border-primary-500 focus:ring-primary-500/20;
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300 px-2 py-1 rounded-md text-xs font-medium;
   }
   
-  .dark-button {
-    @apply bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-600;
+  .badge-error {
+    @apply bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300 px-2 py-1 rounded-md text-xs font-medium;
   }
   
-  .dark-modal {
-    @apply bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600;
+  .badge-info {
+    @apply bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300 px-2 py-1 rounded-md text-xs font-medium;
   }
   
-  .dark-sidebar {
-    @apply bg-white dark:bg-slate-800 border-r border-slate-300 dark:border-slate-600;
+  /* Professional Layout */
+  .dashboard-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
   }
   
-  /* Clean Interactive Elements */
-  .interactive-card {
-    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-1 cursor-pointer;
+  .content-grid {
+    @apply grid grid-cols-1 lg:grid-cols-3 gap-6;
   }
   
-  /* Simple Border Styles */
-  .clean-border {
-    @apply border border-slate-200 dark:border-slate-700;
+  /* Animations */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
   }
   
-  /* Minimalist Card Styles */
-  .clean-card {
-    @apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm;
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
   }
   
-  /* Subtle Glow Effects */
-  .subtle-glow {
-    @apply shadow-sm;
-  }
-  
-  /* Clean Text Styles */
-  .text-clean {
-    @apply text-foreground;
-  }
-  
-  .hover-lift-smooth {
-    @apply transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg;
-  }
-  
-  .focus-ring-glow {
-    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-slate-900;
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
   }
 }
 
-/* Animations */
+/* Keyframes */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
-@keyframes slideIn {
+@keyframes slideUp {
   from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
     transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInRight {
-  from {
     opacity: 0;
-    transform: translateX(20px);
   }
   to {
+    transform: translateY(0);
     opacity: 1;
-    transform: translateX(0);
   }
 }
 
 @keyframes scaleIn {
   from {
-    opacity: 0;
     transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes bounceIn {
-  0% {
     opacity: 0;
-    transform: scale(0.3);
   }
-  50% {
-    opacity: 1;
-    transform: scale(1.05);
-  }
-  70% {
-    transform: scale(0.9);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@keyframes spin {
   to {
-    transform: rotate(360deg);
+    transform: scale(1);
+    opacity: 1;
   }
 }
-
-@keyframes shimmer {
-  0% {
-    background-position: -200px 0;
-  }
-  100% {
-    background-position: calc(200px + 100%) 0;
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes glow {
-  0%, 100% {
-    box-shadow: 0 0 5px rgba(237, 111, 99, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(237, 111, 99, 0.8), 0 0 30px rgba(237, 111, 99, 0.6);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-out;
-}
-
-.animate-slide-in {
-  animation: slideIn 0.3s ease-out;
-}
-
-.animate-slide-in-up {
-  animation: slideInUp 0.4s ease-out;
-}
-
-.animate-slide-in-right {
-  animation: slideInRight 0.4s ease-out;
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.3s ease-out;
-}
-
-.animate-bounce-in {
-  animation: bounceIn 0.6s ease-out;
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-.animate-shimmer {
-  animation: shimmer 2s infinite;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  background-size: 200px 100%;
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.animate-glow {
-  animation: glow 2s ease-in-out infinite;
-}
-
-/* Stagger animations */
-.stagger-fade-in {
-  opacity: 0;
-  animation: fadeIn 0.6s ease-out forwards;
-}
-
-.stagger-fade-in:nth-child(1) { animation-delay: 0.1s; }
-.stagger-fade-in:nth-child(2) { animation-delay: 0.2s; }
-.stagger-fade-in:nth-child(3) { animation-delay: 0.3s; }
-.stagger-fade-in:nth-child(4) { animation-delay: 0.4s; }
-.stagger-fade-in:nth-child(5) { animation-delay: 0.5s; }
 
 /* Focus styles */
 .focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-slate-800;
+  @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
 }
 
-/* Text utilities */
+/* Utility classes */
 .text-balance {
   text-wrap: balance;
 }
 
-/* Line clamp utilities */
 .line-clamp-1 {
-  overflow: hidden;
   display: -webkit-box;
-  -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .line-clamp-2 {
-  overflow: hidden;
   display: -webkit-box;
-  -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .line-clamp-3 {
-  overflow: hidden;
   display: -webkit-box;
-  -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-/* Loading states */
+/* Loading skeleton */
 .loading-skeleton {
-  @apply animate-pulse bg-slate-200 dark:bg-slate-700 rounded;
-}
-
-/* Custom focus styles for better accessibility */
-.focus-visible:focus {
-  @apply outline-none ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-800;
+  @apply animate-pulse bg-muted rounded;
 }
 
 /* Print styles */
@@ -422,20 +366,20 @@ html {
   }
 }
 
-/* High contrast mode support */
+/* High contrast mode */
 @media (prefers-contrast: high) {
   :root {
-    --border: 0 0 0;
-    --input: 0 0 0;
+    --border: 0 0% 20%;
+    --muted-foreground: 0 0% 20%;
   }
   
   .dark {
-    --border: 255 255 255;
-    --input: 255 255 255;
+    --border: 0 0% 80%;
+    --muted-foreground: 0 0% 80%;
   }
 }
 
-/* Reduced motion support */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
