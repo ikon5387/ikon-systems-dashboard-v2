@@ -1,6 +1,7 @@
 import { Component, ErrorInfo, ReactNode } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
+import { config } from '@/lib/env'
 
 interface Props {
   children: ReactNode
@@ -10,6 +11,7 @@ interface Props {
 interface State {
   hasError: boolean
   error?: Error
+  errorId?: string
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -19,16 +21,36 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error }
+    const errorId = `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return { hasError: true, error, errorId }
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('Uncaught error:', error, errorInfo)
     
-    // In production, you might want to log this to an error reporting service
-    if (import.meta.env.PROD && import.meta.env.VITE_SENTRY_DSN) {
+    // Log error details for debugging
+    const errorDetails = {
+      error: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+      errorId: this.state.errorId,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+      url: window.location.href,
+      environment: config.app.environment
+    }
+    
+    // In production, log to error reporting service
+    if (config.app.isProduction && config.sentry.enabled) {
       // Log to Sentry or other error tracking service
-      console.log('Error would be sent to Sentry in production')
+      console.log('Error would be sent to Sentry in production:', errorDetails)
+    }
+    
+    // Store error in localStorage for debugging
+    if (config.app.debug) {
+      const errors = JSON.parse(localStorage.getItem('app_errors') || '[]')
+      errors.push(errorDetails)
+      localStorage.setItem('app_errors', JSON.stringify(errors.slice(-10))) // Keep last 10 errors
     }
   }
 
@@ -37,7 +59,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleReset = () => {
-    this.setState({ hasError: false, error: undefined })
+    this.setState({ hasError: false, error: undefined, errorId: undefined })
   }
 
   public render() {
@@ -57,9 +79,11 @@ export class ErrorBoundary extends Component<Props, State> {
                 We&apos;re sorry, but something unexpected happened. Please try refreshing the page.
               </p>
               
-              {import.meta.env.DEV && this.state.error && (
+              {config.app.debug && this.state.error && (
                 <details className="bg-slate-100 p-3 rounded-lg text-sm">
-                  <summary className="cursor-pointer font-medium">Error details</summary>
+                  <summary className="cursor-pointer font-medium">
+                    Error details {this.state.errorId && `(ID: ${this.state.errorId})`}
+                  </summary>
                   <pre className="mt-2 text-xs overflow-auto">
                     {this.state.error.stack}
                   </pre>

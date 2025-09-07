@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { 
   FiPlus, 
@@ -17,6 +17,10 @@ import {
   FiClock,
   FiVolume2,
   FiMessageSquare,
+  FiRefreshCw,
+  FiExternalLink,
+  FiSettings,
+  FiBarChart3,
 } from 'react-icons/fi'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -27,6 +31,9 @@ import { VoiceAgentForm } from '@/components/forms/VoiceAgentForm'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useVoiceAgents, useCreateVoiceAgent, useUpdateVoiceAgent, useDeleteVoiceAgent, useUpdateVoiceAgentStatus, useMakeCall } from '@/hooks/useVoiceAgents'
 import { useAuth } from '@/hooks/useAuth'
+import { VAPIService } from '@/services/integrations/VAPIService'
+import { VAPITab } from '@/components/integrations/VAPITab'
+import { notifications } from '@/lib/notifications'
 import type { VoiceAgent } from '@/services/voice-agents/VoiceAgentService'
 
 const statusConfig = {
@@ -70,6 +77,13 @@ export function VoiceAgentsPage() {
   const [deletingAgent, setDeletingAgent] = useState<VoiceAgent | null>(null)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [testCallNumber, setTestCallNumber] = useState('')
+  
+  // VAPI integration state
+  const [vapiConnected, setVapiConnected] = useState(false)
+  const [vapiAgents, setVapiAgents] = useState<any[]>([])
+  const [vapiCalls, setVapiCalls] = useState<any[]>([])
+  const [loadingVapi, setLoadingVapi] = useState(false)
+  const [activeTab, setActiveTab] = useState<'agents' | 'vapi'>('agents')
 
   const { data: agents, isLoading, error } = useVoiceAgents()
   const createAgentMutation = useCreateVoiceAgent()
@@ -77,6 +91,78 @@ export function VoiceAgentsPage() {
   const deleteAgentMutation = useDeleteVoiceAgent()
   const updateStatusMutation = useUpdateVoiceAgentStatus()
   const makeCallMutation = useMakeCall()
+
+  const vapiService = VAPIService
+
+  // Check VAPI connection on component mount
+  useEffect(() => {
+    checkVapiConnection()
+  }, [])
+
+  const checkVapiConnection = async () => {
+    try {
+      const response = await vapiService.getVoiceAgents()
+      setVapiConnected(response.success)
+      if (response.success) {
+        loadVapiData()
+      }
+    } catch (error) {
+      console.error('Failed to check VAPI connection:', error)
+    }
+  }
+
+  const loadVapiData = async () => {
+    try {
+      setLoadingVapi(true)
+      const [agentsResponse, callsResponse] = await Promise.all([
+        vapiService.getVoiceAgents(),
+        vapiService.getCallHistory('', 20)
+      ])
+      
+      if (agentsResponse.success && agentsResponse.data) {
+        setVapiAgents(agentsResponse.data)
+      }
+      
+      if (callsResponse.success && callsResponse.data) {
+        setVapiCalls(callsResponse.data)
+      }
+    } catch (error) {
+      console.error('Failed to load VAPI data:', error)
+      notifications.error('Failed to load VAPI data')
+    } finally {
+      setLoadingVapi(false)
+    }
+  }
+
+  const createVapiAgent = async (agentData: any) => {
+    try {
+      const response = await vapiService.createVoiceAgent(agentData)
+      if (response.success) {
+        notifications.success('VAPI agent created successfully')
+        loadVapiData() // Refresh data
+        return response.data
+      } else {
+        notifications.error('Failed to create VAPI agent')
+      }
+    } catch (error) {
+      notifications.error('Failed to create VAPI agent')
+    }
+  }
+
+  const makeVapiCall = async (agentId: string, phoneNumber: string) => {
+    try {
+      const response = await vapiService.makeCall(agentId, phoneNumber)
+      if (response.success) {
+        notifications.success('Call initiated successfully')
+        loadVapiData() // Refresh data
+        return response.data
+      } else {
+        notifications.error('Failed to initiate call')
+      }
+    } catch (error) {
+      notifications.error('Failed to initiate call')
+    }
+  }
 
   // Filter and search agents
   const filteredAgents = useMemo(() => {
@@ -213,15 +299,67 @@ export function VoiceAgentsPage() {
             Manage your AI voice agents powered by Vapi
           </p>
         </div>
-        <Button
-          onClick={() => setShowAgentForm(true)}
-          className="mt-4 sm:mt-0 bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 button-glow hover-lift"
-        >
-          <FiPlus className="w-4 h-4 mr-2" />
-          Create Agent
-        </Button>
+        <div className="flex gap-3 mt-4 sm:mt-0">
+          <Button
+            onClick={() => setShowAgentForm(true)}
+            className="bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 button-glow hover-lift"
+          >
+            <FiPlus className="w-4 h-4 mr-2" />
+            Create Agent
+          </Button>
+          {vapiConnected && (
+            <Button
+              onClick={loadVapiData}
+              variant="outline"
+              disabled={loadingVapi}
+            >
+              <FiRefreshCw className={`w-4 h-4 mr-2 ${loadingVapi ? 'animate-spin' : ''}`} />
+              Sync VAPI
+            </Button>
+          )}
+        </div>
       </div>
 
+      {/* Tab Navigation */}
+      <div className="border-b border-slate-200 dark:border-slate-700">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('agents')}
+            className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'agents'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300'
+            }`}
+          >
+            <FiMic className="w-4 h-4" />
+            Voice Agents
+          </button>
+          <button
+            onClick={() => setActiveTab('vapi')}
+            className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'vapi'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300'
+            }`}
+          >
+            <FiActivity className="w-4 h-4" />
+            VAPI
+            {vapiConnected ? (
+              <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300 text-xs">
+                Connected
+              </Badge>
+            ) : (
+              <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300 text-xs">
+                Disconnected
+              </Badge>
+            )}
+          </button>
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'agents' && (
+        <>
       {/* Filters and Search */}
       <Card>
         <CardContent className="p-6">
@@ -436,6 +574,20 @@ export function VoiceAgentsPage() {
             )
           })}
         </div>
+      )}
+        </>
+      )}
+
+      {activeTab === 'vapi' && (
+        <VAPITab 
+          connected={vapiConnected}
+          agents={vapiAgents}
+          calls={vapiCalls}
+          loading={loadingVapi}
+          onRefresh={loadVapiData}
+          onCreateAgent={createVapiAgent}
+          onMakeCall={makeVapiCall}
+        />
       )}
 
       {/* Agent Form Modal */}

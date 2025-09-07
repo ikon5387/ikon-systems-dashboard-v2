@@ -18,6 +18,7 @@ import { MRRChart } from '@/components/charts/MRRChart'
 import { useClientStats } from '@/hooks/useClients'
 import { useAuth } from '@/hooks/useAuth'
 import { useRealtimeClients } from '@/hooks/useRealtime'
+import { useRecentActivities, useActivityRealtime } from '@/hooks/useActivity'
 import { useQueryClient } from '@tanstack/react-query'
 
 // Mock data for demonstration
@@ -31,44 +32,49 @@ const mockStats = {
   recentlyAdded: 5
 }
 
-const mockRecentActivity = [
-  {
-    id: 1,
-    type: 'client',
-    action: 'New client added',
-    name: 'John Smith',
-    time: '2 hours ago',
+// Activity type configurations
+const activityConfig = {
+  client: {
     icon: FiUsers,
-    color: 'text-blue-600 bg-blue-100'
+    colors: {
+      created: 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/20',
+      updated: 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/20',
+      deleted: 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/20'
+    }
   },
-  {
-    id: 2,
-    type: 'appointment',
-    action: 'Appointment scheduled',
-    name: 'Sarah Johnson',
-    time: '4 hours ago',
+  project: {
+    icon: FiTrendingUp,
+    colors: {
+      created: 'text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-900/20',
+      updated: 'text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-900/20',
+      deleted: 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/20'
+    }
+  },
+  appointment: {
     icon: FiCalendar,
-    color: 'text-green-600 bg-green-100'
+    colors: {
+      created: 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/20',
+      updated: 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/20',
+      deleted: 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/20'
+    }
   },
-  {
-    id: 3,
-    type: 'payment',
-    action: 'Payment received',
-    name: 'Mike Davis',
-    time: '6 hours ago',
+  invoice: {
     icon: FiDollarSign,
-    color: 'text-emerald-600 bg-emerald-100'
+    colors: {
+      created: 'text-emerald-600 bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/20',
+      updated: 'text-emerald-600 bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/20',
+      deleted: 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/20'
+    }
   },
-  {
-    id: 4,
-    type: 'call',
-    action: 'Missed call',
-    name: 'Lisa Wilson',
-    time: '1 day ago',
+  voice_agent: {
     icon: FiPhone,
-    color: 'text-red-600 bg-red-100'
+    colors: {
+      created: 'text-indigo-600 bg-indigo-100 dark:text-indigo-400 dark:bg-indigo-900/20',
+      updated: 'text-indigo-600 bg-indigo-100 dark:text-indigo-400 dark:bg-indigo-900/20',
+      deleted: 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/20'
+    }
   }
-]
+}
 
 const mockUpcomingAppointments = [
   {
@@ -98,6 +104,8 @@ export function DashboardPage() {
   const { profile } = useAuth()
   const [loading, setLoading] = useState(true)
   const { data: stats, isLoading: statsLoading } = useClientStats()
+  const { data: activitiesData, isLoading: activitiesLoading } = useRecentActivities(10)
+  const { subscribe: subscribeToActivities } = useActivityRealtime()
   const queryClient = useQueryClient()
 
   useEffect(() => {
@@ -112,6 +120,29 @@ export function DashboardPage() {
     queryClient.invalidateQueries({ queryKey: ['clientStats'] })
     queryClient.invalidateQueries({ queryKey: ['clients'] })
   })
+
+  // Real-time updates for activities
+  useEffect(() => {
+    const subscription = subscribeToActivities((payload) => {
+      console.log('Real-time activity update:', payload)
+    })
+    
+    return () => {
+      subscription?.unsubscribe()
+    }
+  }, [subscribeToActivities])
+
+  // Format time ago
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+    
+    if (diffInSeconds < 60) return 'Just now'
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
+    return `${Math.floor(diffInSeconds / 86400)}d ago`
+  }
 
   if (loading || statsLoading) {
     return (
@@ -271,31 +302,60 @@ export function DashboardPage() {
       {/* Charts and Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activity */}
-        <Card className="lg:col-span-2 card-hover glass-effect">
-          <CardHeader className="border-b border-slate-100 dark:border-slate-700">
-            <CardTitle className="gradient-text">Recent Activity</CardTitle>
-            <p className="text-sm text-slate-600 dark:text-slate-400">Latest business updates</p>
+        <Card className="lg:col-span-2 card-hover clean-card">
+          <CardHeader className="border-b border-border">
+            <CardTitle className="text-foreground">Recent Activity</CardTitle>
+            <p className="text-sm text-muted-foreground">Live business updates</p>
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-4">
-              {mockRecentActivity.map((activity, index) => (
-                <div
-                  key={activity.id}
-                  className="flex items-start space-x-3 p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${activity.color}`}>
-                    <activity.icon className="w-4 h-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                      {activity.action}
-                    </p>
-                    <p className="text-sm text-primary font-medium">{activity.name}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{activity.time}</p>
-                  </div>
+              {activitiesLoading ? (
+                <div className="space-y-3">
+                  {[...Array(5)].map((_, index) => (
+                    <div key={index} className="flex items-start space-x-3 p-3 rounded-lg">
+                      <div className="w-8 h-8 bg-muted rounded-full animate-pulse"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-muted rounded animate-pulse"></div>
+                        <div className="h-3 bg-muted rounded w-2/3 animate-pulse"></div>
+                        <div className="h-3 bg-muted rounded w-1/3 animate-pulse"></div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : activitiesData?.data && activitiesData.data.length > 0 ? (
+                activitiesData.data.map((activity, index) => {
+                  const config = activityConfig[activity.entity_type as keyof typeof activityConfig]
+                  const Icon = config?.icon || FiActivity
+                  const colorClass = config?.colors[activity.action as keyof typeof config.colors] || 'text-gray-600 bg-gray-100'
+                  
+                  return (
+                    <div
+                      key={activity.id}
+                      className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors duration-200"
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${colorClass}`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground">
+                          {activity.entity_name} {activity.action}
+                        </p>
+                        <p className="text-sm text-muted-foreground capitalize">
+                          {activity.entity_type.replace('_', ' ')}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{formatTimeAgo(activity.created_at)}</p>
+                      </div>
+                    </div>
+                  )
+                })
+              ) : (
+                <div className="text-center py-8">
+                  <FiActivity className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No recent activity</p>
+                  <p className="text-sm text-muted-foreground">Start by adding clients or projects</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

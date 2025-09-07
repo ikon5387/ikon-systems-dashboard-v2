@@ -8,6 +8,7 @@ export { useAppointments } from './useAppointments'
 export { useVoiceAgents } from './useVoiceAgents'
 export { useFinancialStats } from './useFinancials'
 export { useAnalyticsData } from './useAnalytics'
+export { useRecentActivities, useActivityLogger } from './useActivity'
 
 // Realtime hooks
 export { useRealtime, useRealtimeClients, useRealtimeProjects, useRealtimeAppointments, useRealtimeVoiceAgents, useRealtimeFinancials } from './useRealtime'

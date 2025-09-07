@@ -20,9 +20,11 @@ import { useTheme } from '@/hooks/useTheme'
 
 interface HeaderProps {
   onSidebarToggle: () => void
+  onDesktopToggle?: () => void
+  isDesktopCollapsed?: boolean
 }
 
-export function Header({ onSidebarToggle }: HeaderProps) {
+export function Header({ onSidebarToggle, onDesktopToggle, isDesktopCollapsed }: HeaderProps) {
   const { user, profile, signOut } = useAuth()
   const { theme, setTheme } = useTheme()
   const navigate = useNavigate()
@@ -67,7 +69,7 @@ export function Header({ onSidebarToggle }: HeaderProps) {
   ]
 
   return (
-    <header className="glass-effect border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-30">
+    <header className="bg-background border-b border-border sticky top-0 z-30 shadow-sm">
       <div className="px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Left side */}
@@ -77,6 +79,16 @@ export function Header({ onSidebarToggle }: HeaderProps) {
               size="sm"
               onClick={onSidebarToggle}
               className="lg:hidden"
+            >
+              <FiMenu className="w-5 h-5" />
+            </Button>
+            
+            {/* Desktop sidebar toggle */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onDesktopToggle}
+              className="hidden lg:flex"
             >
               <FiMenu className="w-5 h-5" />
             </Button>

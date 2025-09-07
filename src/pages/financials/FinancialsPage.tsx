@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
   FiPlus,
@@ -17,6 +17,11 @@ import {
   FiAlertCircle,
   FiClock,
   FiXCircle,
+  FiRefreshCw,
+  FiExternalLink,
+  FiSettings,
+  FiCreditCard,
+  FiUsers,
 } from 'react-icons/fi'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -28,6 +33,9 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useInvoices, useCreateInvoice, useUpdateInvoice, useDeleteInvoice, useFinancialStats } from '@/hooks/useFinancials'
 import { useAuth } from '@/hooks/useAuth'
 import { formatDate, formatCurrency } from '@/lib/utils'
+import { StripeService } from '@/services/integrations/StripeService'
+import { StripeTab } from '@/components/integrations/StripeTab'
+import { notifications } from '@/lib/notifications'
 import type { Invoice } from '@/services/financials/FinancialService'
 
 const statusColors = {
@@ -62,12 +70,90 @@ export function FinancialsPage() {
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null)
   const [deletingInvoice, setDeletingInvoice] = useState<Invoice | null>(null)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  
+  // Stripe integration state
+  const [stripeConnected, setStripeConnected] = useState(false)
+  const [stripeCustomers, setStripeCustomers] = useState<any[]>([])
+  const [stripePayments, setStripePayments] = useState<any[]>([])
+  const [loadingStripe, setLoadingStripe] = useState(false)
+  const [activeTab, setActiveTab] = useState<'invoices' | 'stripe'>('invoices')
 
   const { data: invoices, isLoading, error } = useInvoices()
   const { data: stats } = useFinancialStats()
   const createInvoiceMutation = useCreateInvoice()
   const updateInvoiceMutation = useUpdateInvoice()
   const deleteInvoiceMutation = useDeleteInvoice()
+
+  const stripeService = StripeService
+
+  // Check Stripe connection on component mount
+  useEffect(() => {
+    checkStripeConnection()
+  }, [])
+
+  const checkStripeConnection = async () => {
+    try {
+      const response = await stripeService.getCustomers()
+      setStripeConnected(response.success)
+      if (response.success) {
+        loadStripeData()
+      }
+    } catch (error) {
+      console.error('Failed to check Stripe connection:', error)
+    }
+  }
+
+  const loadStripeData = async () => {
+    try {
+      setLoadingStripe(true)
+      const [customersResponse, paymentsResponse] = await Promise.all([
+        stripeService.getCustomers(),
+        stripeService.getPaymentHistory('', 20)
+      ])
+      
+      if (customersResponse.success && customersResponse.data) {
+        setStripeCustomers(customersResponse.data)
+      }
+      
+      if (paymentsResponse.success && paymentsResponse.data) {
+        setStripePayments(paymentsResponse.data)
+      }
+    } catch (error) {
+      console.error('Failed to load Stripe data:', error)
+      notifications.error('Failed to load Stripe data')
+    } finally {
+      setLoadingStripe(false)
+    }
+  }
+
+  const createStripePaymentIntent = async (amount: number, customerId?: string) => {
+    try {
+      const response = await stripeService.createPaymentIntent(amount, 'usd', customerId)
+      if (response.success) {
+        notifications.success('Payment intent created successfully')
+        return response.data
+      } else {
+        notifications.error('Failed to create payment intent')
+      }
+    } catch (error) {
+      notifications.error('Failed to create payment intent')
+    }
+  }
+
+  const createStripeCustomer = async (email: string, name?: string) => {
+    try {
+      const response = await stripeService.createCustomer(email, name)
+      if (response.success) {
+        notifications.success('Customer created successfully')
+        loadStripeData() // Refresh data
+        return response.data
+      } else {
+        notifications.error('Failed to create customer')
+      }
+    } catch (error) {
+      notifications.error('Failed to create customer')
+    }
+  }
 
   // Filter and search invoices
   const filteredInvoices = useMemo(() => {
@@ -176,15 +262,67 @@ export function FinancialsPage() {
             Manage invoices, payments, and track your business finances
           </p>
         </div>
-        <Button
-          onClick={() => setShowInvoiceForm(true)}
-          className="mt-4 sm:mt-0 bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 button-glow hover-lift"
-        >
-          <FiPlus className="w-4 h-4 mr-2" />
-          Create Invoice
-        </Button>
+        <div className="flex gap-3 mt-4 sm:mt-0">
+          <Button
+            onClick={() => setShowInvoiceForm(true)}
+            className="bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 button-glow hover-lift"
+          >
+            <FiPlus className="w-4 h-4 mr-2" />
+            Create Invoice
+          </Button>
+          {stripeConnected && (
+            <Button
+              onClick={loadStripeData}
+              variant="outline"
+              disabled={loadingStripe}
+            >
+              <FiRefreshCw className={`w-4 h-4 mr-2 ${loadingStripe ? 'animate-spin' : ''}`} />
+              Sync Stripe
+            </Button>
+          )}
+        </div>
       </div>
 
+      {/* Tab Navigation */}
+      <div className="border-b border-slate-200 dark:border-slate-700">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('invoices')}
+            className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'invoices'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300'
+            }`}
+          >
+            <FiFileText className="w-4 h-4" />
+            Invoices
+          </button>
+          <button
+            onClick={() => setActiveTab('stripe')}
+            className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'stripe'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300'
+            }`}
+          >
+            <FiCreditCard className="w-4 h-4" />
+            Stripe
+            {stripeConnected ? (
+              <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300 text-xs">
+                Connected
+              </Badge>
+            ) : (
+              <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300 text-xs">
+                Disconnected
+              </Badge>
+            )}
+          </button>
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'invoices' && (
+        <>
       {/* Financial Stats */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -468,6 +606,20 @@ export function FinancialsPage() {
             />
           </div>
         </div>
+      )}
+        </>
+      )}
+
+      {activeTab === 'stripe' && (
+        <StripeTab 
+          connected={stripeConnected}
+          customers={stripeCustomers}
+          payments={stripePayments}
+          loading={loadingStripe}
+          onRefresh={loadStripeData}
+          onCreatePaymentIntent={createStripePaymentIntent}
+          onCreateCustomer={createStripeCustomer}
+        />
       )}
 
       {/* Delete Confirmation Dialog */}

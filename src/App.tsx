@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 // import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -7,10 +7,16 @@ import { Toaster } from 'react-hot-toast'
 // Components
 import { LoadingPage } from '@/components/ui/LoadingSpinner'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { MaintenanceMode } from '@/components/MaintenanceMode'
 import { Layout } from '@/components/layout/Layout'
 
 // Hooks
 import { useAuth } from '@/hooks/useAuth'
+import { useTheme } from '@/hooks/useTheme'
+
+// Performance monitoring and config
+import { PerformanceMonitor } from '@/lib/performance'
+import { config } from '@/lib/env'
 
 // Lazy load pages for better performance
 const LoginPage = React.lazy(() => import('@/pages/auth/LoginPage').then(m => ({ default: m.LoginPage })))
@@ -22,13 +28,16 @@ const AppointmentsPage = React.lazy(() => import('@/pages/appointments/Appointme
 const VoiceAgentsPage = React.lazy(() => import('@/pages/voice-agents/VoiceAgentsPage').then(m => ({ default: m.VoiceAgentsPage })))
 const FinancialsPage = React.lazy(() => import('@/pages/financials/FinancialsPage').then(m => ({ default: m.FinancialsPage })))
 const AnalyticsPage = React.lazy(() => import('@/pages/analytics/AnalyticsPage').then(m => ({ default: m.AnalyticsPage })))
+const IntegrationsPage = React.lazy(() => import('@/pages/integrations/IntegrationsPage').then(m => ({ default: m.IntegrationsPage })))
+const PhoneNumbersPage = React.lazy(() => import('@/pages/phone-numbers/PhoneNumbersPage').then(m => ({ default: m.PhoneNumbersPage })))
 const SettingsPage = React.lazy(() => import('@/pages/SettingsPage').then(m => ({ default: m.SettingsPage })))
 
-// Create a client
+// Enhanced QueryClient with better caching and error handling
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
       retry: (failureCount, error: any) => {
         // Don't retry on 4xx errors
         if (error?.status >= 400 && error?.status < 500) {
@@ -36,9 +45,17 @@ const queryClient = new QueryClient({
         }
         return failureCount < 3
       },
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
     },
     mutations: {
-      retry: false,
+      retry: (failureCount, error: any) => {
+        // Don't retry mutations on client errors
+        if (error?.status >= 400 && error?.status < 500) {
+          return false
+        }
+        return failureCount < 2
+      },
     },
   },
 })
@@ -323,6 +340,30 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/integrations"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Suspense fallback={<LoadingPage />}>
+                <IntegrationsPage />
+              </Suspense>
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/phone-numbers"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Suspense fallback={<LoadingPage />}>
+                <PhoneNumbersPage />
+              </Suspense>
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/settings"
         element={
           <ProtectedRoute>
@@ -348,52 +389,107 @@ function AppRoutes() {
 
 // Main App Component
 function App() {
+  const [isInitialized, setIsInitialized] = useState(false)
+  const { theme } = useTheme()
+
+  // Check for maintenance mode
+  if (config.app.maintenanceMode) {
+    return <MaintenanceMode />
+  }
+
   useEffect(() => {
-    // Set up global error handling
-    const handleError = (event: ErrorEvent) => {
-      console.error('Global error:', event.error)
+    const initializeApp = async () => {
+      try {
+        // Initialize performance monitoring
+        PerformanceMonitor.getInstance()
+        
+        // Set up global error handling with enhanced logging
+        const handleError = (event: ErrorEvent) => {
+          console.error('Global error:', event.error)
+          PerformanceMonitor.getInstance().logError(event.error)
+        }
+
+        const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+          console.error('Unhandled promise rejection:', event.reason)
+          PerformanceMonitor.getInstance().logError(event.reason)
+        }
+
+        window.addEventListener('error', handleError)
+        window.addEventListener('unhandledrejection', handleUnhandledRejection)
+
+        // Initialize theme
+        document.documentElement.classList.toggle('dark', theme === 'dark')
+        
+        // Preload critical resources
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(() => {
+            // Preload images and other resources
+            const preloadLinks = document.querySelectorAll('link[rel="preload"]')
+            preloadLinks.forEach(link => {
+              if (link instanceof HTMLLinkElement) {
+                link.rel = 'stylesheet'
+              }
+            })
+          })
+        }
+        
+        setIsInitialized(true)
+
+        return () => {
+          window.removeEventListener('error', handleError)
+          window.removeEventListener('unhandledrejection', handleUnhandledRejection)
+        }
+      } catch (error) {
+        console.error('App initialization failed:', error)
+        setIsInitialized(true) // Still show the app even if initialization fails
+      }
     }
 
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      console.error('Unhandled promise rejection:', event.reason)
-    }
+    initializeApp()
+  }, [theme])
 
-    window.addEventListener('error', handleError)
-    window.addEventListener('unhandledrejection', handleUnhandledRejection)
-
-    return () => {
-      window.removeEventListener('error', handleError)
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection)
-    }
-  }, [])
+  // Show loading screen during initialization
+  if (!isInitialized) {
+    return <LoadingPage text="Initializing application..." />
+  }
 
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <Router>
-          <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
-            <AppRoutes />
+          <div className="min-h-screen bg-background text-foreground transition-colors duration-200">
+            <Suspense fallback={<LoadingPage />}>
+              <AppRoutes />
+            </Suspense>
             
-            {/* Toast Notifications */}
+            {/* Enhanced Toast Notifications */}
             <Toaster
               position="top-right"
               toastOptions={{
                 duration: 4000,
                 style: {
-                  background: 'var(--toast-bg)',
-                  color: 'var(--toast-color)',
-                  border: '1px solid var(--toast-border)',
+                  background: 'hsl(var(--card))',
+                  color: 'hsl(var(--card-foreground))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: '0.5rem',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
                 },
                 success: {
                   iconTheme: {
-                    primary: '#10b981',
-                    secondary: '#ffffff',
+                    primary: 'hsl(var(--primary))',
+                    secondary: 'hsl(var(--primary-foreground))',
                   },
                 },
                 error: {
                   iconTheme: {
-                    primary: '#ef4444',
-                    secondary: '#ffffff',
+                    primary: 'hsl(var(--destructive))',
+                    secondary: 'hsl(var(--destructive-foreground))',
+                  },
+                },
+                loading: {
+                  iconTheme: {
+                    primary: 'hsl(var(--primary))',
+                    secondary: 'hsl(var(--primary-foreground))',
                   },
                 },
               }}

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { 
   FiPlus, 
@@ -11,8 +11,11 @@ import {
   FiUser,
   FiCheckCircle,
   FiXCircle,
+  FiRefreshCw,
+  FiExternalLink,
+  FiSettings,
 } from 'react-icons/fi'
-import { Card, CardContent } from '@/components/ui/Card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Badge } from '@/components/ui/Badge'
@@ -22,6 +25,9 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useAppointments, useCreateAppointment, useUpdateAppointment, useDeleteAppointment } from '@/hooks/useAppointments'
 import { useAuth } from '@/hooks/useAuth'
 import { formatDate } from '@/lib/utils'
+import { GoogleCalendarService } from '@/services/integrations/GoogleCalendarService'
+import { GoogleCalendarTab } from '@/components/integrations/GoogleCalendarTab'
+import { notifications } from '@/lib/notifications'
 import type { AppointmentWithClient } from '@/services/appointments/AppointmentService'
 
 const statusConfig = {
@@ -70,11 +76,88 @@ export function AppointmentsPage() {
   const [editingAppointment, setEditingAppointment] = useState<AppointmentWithClient | null>(null)
   const [deletingAppointment, setDeletingAppointment] = useState<AppointmentWithClient | null>(null)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  
+  // Google Calendar integration state
+  const [googleCalendarConnected, setGoogleCalendarConnected] = useState(false)
+  const [googleCalendarEvents, setGoogleCalendarEvents] = useState<any[]>([])
+  const [loadingGoogleCalendar, setLoadingGoogleCalendar] = useState(false)
+  const [activeTab, setActiveTab] = useState<'appointments' | 'google-calendar'>('appointments')
 
   const { data: appointments, isLoading, error } = useAppointments()
   const createAppointmentMutation = useCreateAppointment()
   const updateAppointmentMutation = useUpdateAppointment()
   const deleteAppointmentMutation = useDeleteAppointment()
+
+  const googleCalendarService = GoogleCalendarService
+
+  // Check Google Calendar connection on component mount
+  useEffect(() => {
+    checkGoogleCalendarConnection()
+  }, [])
+
+  const checkGoogleCalendarConnection = async () => {
+    try {
+      const isConnected = await googleCalendarService.isAuthenticated()
+      setGoogleCalendarConnected(isConnected)
+      if (isConnected) {
+        loadGoogleCalendarEvents()
+      }
+    } catch (error) {
+      console.error('Failed to check Google Calendar connection:', error)
+    }
+  }
+
+  const loadGoogleCalendarEvents = async () => {
+    try {
+      setLoadingGoogleCalendar(true)
+      const response = await googleCalendarService.getUpcomingEvents()
+      if (response.success && response.data) {
+        setGoogleCalendarEvents(response.data.items || [])
+      }
+    } catch (error) {
+      console.error('Failed to load Google Calendar events:', error)
+      notifications.error('Failed to load Google Calendar events')
+    } finally {
+      setLoadingGoogleCalendar(false)
+    }
+  }
+
+  const connectGoogleCalendar = async () => {
+    try {
+      const response = await googleCalendarService.getAuthUrl()
+      if (response.success && response.data) {
+        window.open(response.data.authUrl, '_blank')
+        notifications.success('Please complete authentication in the popup window')
+      } else {
+        notifications.error('Failed to get authentication URL')
+      }
+    } catch (error) {
+      notifications.error('Failed to initiate Google Calendar connection')
+    }
+  }
+
+  const syncAppointmentToGoogleCalendar = async (appointment: AppointmentWithClient) => {
+    try {
+      const eventData = {
+        summary: `${appointment.type} - ${appointment.client?.name || 'Client'}`,
+        description: appointment.notes || `Appointment with ${appointment.client?.name}`,
+        startDateTime: appointment.date_time,
+        endDateTime: new Date(new Date(appointment.date_time).getTime() + (appointment.duration || 60) * 60000).toISOString(),
+        attendees: appointment.client?.email ? [{ email: appointment.client.email, displayName: appointment.client.name }] : [],
+        location: appointment.location || undefined,
+        createMeeting: true
+      }
+
+      const response = await googleCalendarService.createEvent(eventData)
+      if (response.success) {
+        notifications.success('Appointment synced to Google Calendar')
+      } else {
+        notifications.error('Failed to sync appointment to Google Calendar')
+      }
+    } catch (error) {
+      notifications.error('Failed to sync appointment to Google Calendar')
+    }
+  }
 
   // Filter and search appointments
   const filteredAppointments = useMemo(() => {
@@ -219,13 +302,62 @@ export function AppointmentsPage() {
             Manage your schedule and client meetings
           </p>
         </div>
-        <Button
-          onClick={() => setShowAppointmentForm(true)}
-          className="mt-4 sm:mt-0 bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 button-glow hover-lift"
-        >
-          <FiPlus className="w-4 h-4 mr-2" />
-          Schedule Appointment
-        </Button>
+        <div className="flex gap-3 mt-4 sm:mt-0">
+          <Button
+            onClick={() => setShowAppointmentForm(true)}
+            className="bg-gradient-to-r from-primary to-primary-600 hover:from-primary-600 hover:to-primary-700 button-glow hover-lift"
+          >
+            <FiPlus className="w-4 h-4 mr-2" />
+            Schedule Appointment
+          </Button>
+          {googleCalendarConnected && (
+            <Button
+              onClick={loadGoogleCalendarEvents}
+              variant="outline"
+              disabled={loadingGoogleCalendar}
+            >
+              <FiRefreshCw className={`w-4 h-4 mr-2 ${loadingGoogleCalendar ? 'animate-spin' : ''}`} />
+              Sync Calendar
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="border-b border-slate-200 dark:border-slate-700">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('appointments')}
+            className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'appointments'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300'
+            }`}
+          >
+            <FiCalendar className="w-4 h-4" />
+            Appointments
+          </button>
+          <button
+            onClick={() => setActiveTab('google-calendar')}
+            className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'google-calendar'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 dark:text-slate-400 dark:hover:text-slate-300'
+            }`}
+          >
+            <FiSettings className="w-4 h-4" />
+            Google Calendar
+            {googleCalendarConnected ? (
+              <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300 text-xs">
+                Connected
+              </Badge>
+            ) : (
+              <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300 text-xs">
+                Disconnected
+              </Badge>
+            )}
+          </button>
+        </nav>
       </div>
 
       {/* Filters and Search */}
@@ -283,7 +415,21 @@ export function AppointmentsPage() {
           </div>
         </CardContent>
       </Card>
+        </>
+      )}
 
+      {activeTab === 'google-calendar' && (
+        <GoogleCalendarTab 
+          connected={googleCalendarConnected}
+          events={googleCalendarEvents}
+          loading={loadingGoogleCalendar}
+          onConnect={connectGoogleCalendar}
+          onRefresh={loadGoogleCalendarEvents}
+        />
+      )}
+
+      {activeTab === 'appointments' && (
+        <>
       {/* Appointments List */}
       {filteredAppointments.length === 0 ? (
         <Card>
@@ -435,6 +581,8 @@ export function AppointmentsPage() {
             />
           </div>
         </div>
+      )}
+        </>
       )}
 
       {/* Delete Confirmation Dialog */}

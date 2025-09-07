@@ -9,6 +9,7 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [desktopSidebarCollapsed, setDesktopSidebarCollapsed] = useState(false)
   const [mounted, setMounted] = useState(false)
   const { theme } = useTheme()
 
@@ -32,17 +33,23 @@ export function Layout({ children }: LayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+    <div className="min-h-screen bg-background transition-colors duration-200">
       {/* Sidebar */}
       <Sidebar 
         isOpen={sidebarOpen} 
-        onClose={() => setSidebarOpen(false)} 
+        onClose={() => setSidebarOpen(false)}
+        isCollapsed={desktopSidebarCollapsed}
+        onToggleCollapse={() => setDesktopSidebarCollapsed(!desktopSidebarCollapsed)}
       />
 
       {/* Main Content */}
-      <div className="lg:ml-64">
+      <div className={`transition-all duration-300 ${desktopSidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         {/* Header */}
-        <Header onSidebarToggle={() => setSidebarOpen(true)} />
+        <Header 
+          onSidebarToggle={() => setSidebarOpen(true)}
+          onDesktopToggle={() => setDesktopSidebarCollapsed(!desktopSidebarCollapsed)}
+          isDesktopCollapsed={desktopSidebarCollapsed}
+        />
 
         {/* Page Content */}
         <main className="p-6">

@@ -44,6 +44,10 @@ export interface CreatePaymentIntentData {
   description?: string
   customerId?: string
   metadata?: Record<string, string>
+  paymentMethodTypes?: string[]
+  captureMethod?: 'automatic' | 'manual'
+  confirmationMethod?: 'automatic' | 'manual'
+  setupFutureUsage?: 'off_session' | 'on_session'
 }
 
 export interface CreateInvoiceData {
@@ -53,6 +57,13 @@ export interface CreateInvoiceData {
   description: string
   dueDate?: Date
   metadata?: Record<string, string>
+  lineItems?: Array<{
+    description: string
+    amount: number
+    quantity?: number
+  }>
+  taxRate?: number
+  autoAdvance?: boolean
 }
 
 export interface CreateCustomerData {
@@ -66,6 +77,58 @@ export interface CreateCustomerData {
     state?: string
     postal_code?: string
     country?: string
+  }
+  metadata?: Record<string, string>
+  description?: string
+  preferredLocale?: string
+}
+
+export interface PaymentMethod {
+  id: string
+  type: string
+  card?: {
+    brand: string
+    last4: string
+    expMonth: number
+    expYear: number
+  }
+  billingDetails: {
+    name?: string
+    email?: string
+    phone?: string
+    address?: {
+      line1?: string
+      line2?: string
+      city?: string
+      state?: string
+      postal_code?: string
+      country?: string
+    }
+  }
+}
+
+export interface Subscription {
+  id: string
+  customerId: string
+  status: 'incomplete' | 'incomplete_expired' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid'
+  currentPeriodStart: string
+  currentPeriodEnd: string
+  cancelAtPeriodEnd: boolean
+  items: Array<{
+    id: string
+    priceId: string
+    quantity: number
+  }>
+}
+
+export interface Price {
+  id: string
+  productId: string
+  unitAmount: number
+  currency: string
+  recurring?: {
+    interval: 'day' | 'week' | 'month' | 'year'
+    intervalCount: number
   }
   metadata?: Record<string, string>
 }
@@ -363,6 +426,174 @@ class StripeServiceClass {
 
   get stripeInstance(): any {
     return this.stripe
+  }
+
+  // Additional methods for enhanced functionality
+  async getPaymentMethods(customerId: string): Promise<StripeResponse<PaymentMethod[]>> {
+    const response = await this.makeBackendRequest<PaymentMethod[]>(`/customers/${customerId}/payment-methods`, {})
+    
+    if (response.success) {
+      return {
+        data: response.data,
+        error: null,
+        success: true
+      }
+    }
+    
+    return response
+  }
+
+  async createSetupIntent(customerId: string): Promise<StripeResponse<{ clientSecret: string }>> {
+    const response = await this.makeBackendRequest<{ clientSecret: string }>('/setup-intents', {
+      customer: customerId,
+      usage: 'off_session'
+    })
+    
+    if (response.success) {
+      notifications.success('Setup intent created successfully')
+    }
+    
+    return response
+  }
+
+  async createSubscription(customerId: string, priceId: string, quantity: number = 1): Promise<StripeResponse<Subscription>> {
+    const response = await this.makeBackendRequest<Subscription>('/subscriptions', {
+      customer: customerId,
+      items: [{
+        price: priceId,
+        quantity: quantity
+      }],
+      payment_behavior: 'default_incomplete',
+      expand: ['latest_invoice.payment_intent']
+    })
+    
+    if (response.success) {
+      notifications.success('Subscription created successfully')
+    }
+    
+    return response
+  }
+
+  async cancelSubscription(subscriptionId: string, atPeriodEnd: boolean = true): Promise<StripeResponse<Subscription>> {
+    const response = await this.makeBackendRequest<Subscription>(`/subscriptions/${subscriptionId}`, {
+      cancel_at_period_end: atPeriodEnd
+    })
+    
+    if (response.success) {
+      notifications.success('Subscription canceled successfully')
+    }
+    
+    return response
+  }
+
+  async getSubscription(subscriptionId: string): Promise<StripeResponse<Subscription>> {
+    const response = await this.makeBackendRequest<Subscription>(`/subscriptions/${subscriptionId}`, {})
+    return response
+  }
+
+  async getCustomerSubscriptions(customerId: string): Promise<StripeResponse<Subscription[]>> {
+    const response = await this.makeBackendRequest<Subscription[]>(`/customers/${customerId}/subscriptions`, {})
+    return response
+  }
+
+  async createPrice(productId: string, unitAmount: number, currency: string = 'usd', recurring?: { interval: 'day' | 'week' | 'month' | 'year', intervalCount?: number }): Promise<StripeResponse<Price>> {
+    const response = await this.makeBackendRequest<Price>('/prices', {
+      product: productId,
+      unit_amount: unitAmount,
+      currency: currency,
+      recurring: recurring
+    })
+    
+    if (response.success) {
+      notifications.success('Price created successfully')
+    }
+    
+    return response
+  }
+
+  async getPrices(productId?: string): Promise<StripeResponse<Price[]>> {
+    const params = productId ? `?product=${productId}` : ''
+    const response = await this.makeBackendRequest<Price[]>(`/prices${params}`, {})
+    return response
+  }
+
+  async refundPayment(paymentIntentId: string, amount?: number, reason?: 'duplicate' | 'fraudulent' | 'requested_by_customer'): Promise<StripeResponse<{ id: string, status: string }>> {
+    const response = await this.makeBackendRequest<{ id: string, status: string }>('/refunds', {
+      payment_intent: paymentIntentId,
+      amount: amount,
+      reason: reason
+    })
+    
+    if (response.success) {
+      notifications.success('Refund processed successfully')
+    }
+    
+    return response
+  }
+
+  async getPaymentHistory(customerId: string, limit: number = 10): Promise<StripeResponse<PaymentIntent[]>> {
+    const response = await this.makeBackendRequest<PaymentIntent[]>(`/customers/${customerId}/payment-intents`, {
+      limit: limit
+    })
+    return response
+  }
+
+  // Utility methods
+  formatAmount(amountInCents: number, currency: string = 'usd'): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency.toUpperCase()
+    }).format(amountInCents / 100)
+  }
+
+  convertDollarsToCents(dollars: number): number {
+    return Math.round(dollars * 100)
+  }
+
+  convertCentsToDollars(cents: number): number {
+    return cents / 100
+  }
+
+  // Business-specific methods
+  async createProjectInvoice(
+    customerId: string,
+    projectName: string,
+    amount: number,
+    description: string,
+    dueDate?: Date
+  ): Promise<StripeResponse<Invoice>> {
+    const invoiceData: CreateInvoiceData = {
+      customerId,
+      amount: this.convertDollarsToCents(amount),
+      description: `${projectName}: ${description}`,
+      dueDate,
+      metadata: {
+        project: projectName,
+        type: 'project_invoice'
+      }
+    }
+
+    return this.createInvoice(invoiceData)
+  }
+
+  async processProjectPayment(
+    customerId: string,
+    projectName: string,
+    amount: number,
+    description: string
+  ): Promise<StripeResponse<PaymentIntent>> {
+    const paymentData: CreatePaymentIntentData = {
+      amount: this.convertDollarsToCents(amount),
+      currency: 'usd',
+      description: `${projectName}: ${description}`,
+      customerId,
+      metadata: {
+        project: projectName,
+        type: 'project_payment'
+      }
+    }
+
+    return this.createPaymentIntent(paymentData)
   }
 }
 

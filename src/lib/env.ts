@@ -9,6 +9,10 @@ const envSchema = z.object({
   VITE_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
   VITE_GOOGLE_CALENDAR_CLIENT_ID: z.string().optional(),
   VITE_SENTRY_DSN: z.string().optional(),
+  VITE_APP_ENV: z.enum(['development', 'staging', 'production']).default('development'),
+  VITE_APP_DEBUG: z.string().transform(val => val === 'true').default('false'),
+  VITE_APP_ANALYTICS_ID: z.string().optional(),
+  VITE_APP_MAINTENANCE_MODE: z.string().transform(val => val === 'true').default('false'),
 })
 
 function validateEnv() {
@@ -23,12 +27,16 @@ function validateEnv() {
       return {
         VITE_SUPABASE_URL: 'https://drmloijaajtzkvdclwmf.supabase.co',
         VITE_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRybWxvaWphYWp0emt2ZGNsd21mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1MjgzMjMsImV4cCI6MjA3MjEwNDMyM30.axIWyuz9yvSaQgW-l-iMjwSAsNKcllyLSlv3Aj4zatY',
-        VITE_VAPI_API_KEY: undefined,
-        VITE_TWILIO_ACCOUNT_SID: undefined,
-        VITE_TWILIO_AUTH_TOKEN: undefined,
-        VITE_STRIPE_PUBLISHABLE_KEY: undefined,
-        VITE_GOOGLE_CALENDAR_CLIENT_ID: undefined,
+        VITE_VAPI_API_KEY: 'aab4aefd-1b57-43b0-9fd5-e05767b59452',
+        VITE_TWILIO_ACCOUNT_SID: 'AC4a2d843480651632e193c7eb47926e6c',
+        VITE_TWILIO_AUTH_TOKEN: '11a1d3d0537f46a9e081006c6ae233bc',
+        VITE_STRIPE_PUBLISHABLE_KEY: 'pk_live_51S4YDzPylkOEYCeleUYF2vcuGCVgTps9t3y1hb4Qn5jY7vBgMGrDBSj2hEw6mnC355A9HPaG9l6EPtMMjBB4Zbxe00PiDwxo9c',
+        VITE_GOOGLE_CALENDAR_CLIENT_ID: '901267958264-ndsknvnql46t3uvmtruogi4ksa7ca52t.apps.googleusercontent.com',
         VITE_SENTRY_DSN: undefined,
+        VITE_APP_ENV: 'development' as const,
+        VITE_APP_DEBUG: false,
+        VITE_APP_ANALYTICS_ID: undefined,
+        VITE_APP_MAINTENANCE_MODE: false,
       }
     }
     
@@ -47,12 +55,16 @@ function validateEnv() {
       return {
         VITE_SUPABASE_URL: 'https://drmloijaajtzkvdclwmf.supabase.co',
         VITE_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRybWxvaWphYWp0emt2ZGNsd21mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1MjgzMjMsImV4cCI6MjA3MjEwNDMyM30.axIWyuz9yvSaQgW-l-iMjwSAsNKcllyLSlv3Aj4zatY',
-        VITE_VAPI_API_KEY: undefined,
-        VITE_TWILIO_ACCOUNT_SID: undefined,
-        VITE_TWILIO_AUTH_TOKEN: undefined,
-        VITE_STRIPE_PUBLISHABLE_KEY: undefined,
-        VITE_GOOGLE_CALENDAR_CLIENT_ID: undefined,
+        VITE_VAPI_API_KEY: 'aab4aefd-1b57-43b0-9fd5-e05767b59452',
+        VITE_TWILIO_ACCOUNT_SID: 'AC4a2d843480651632e193c7eb47926e6c',
+        VITE_TWILIO_AUTH_TOKEN: '11a1d3d0537f46a9e081006c6ae233bc',
+        VITE_STRIPE_PUBLISHABLE_KEY: 'pk_live_51S4YDzPylkOEYCeleUYF2vcuGCVgTps9t3y1hb4Qn5jY7vBgMGrDBSj2hEw6mnC355A9HPaG9l6EPtMMjBB4Zbxe00PiDwxo9c',
+        VITE_GOOGLE_CALENDAR_CLIENT_ID: '901267958264-ndsknvnql46t3uvmtruogi4ksa7ca52t.apps.googleusercontent.com',
         VITE_SENTRY_DSN: undefined,
+        VITE_APP_ENV: 'production' as const,
+        VITE_APP_DEBUG: false,
+        VITE_APP_ANALYTICS_ID: undefined,
+        VITE_APP_MAINTENANCE_MODE: false,
       }
     }
     throw error
@@ -102,9 +114,13 @@ export const config = {
   },
   app: {
     name: 'Ikon Systems Dashboard',
-    version: '1.0.0',
-    environment: import.meta.env.MODE,
-    isDevelopment: import.meta.env.DEV,
-    isProduction: import.meta.env.PROD,
+    version: '2.0.0',
+    environment: env.VITE_APP_ENV,
+    isDevelopment: env.VITE_APP_ENV === 'development',
+    isProduction: env.VITE_APP_ENV === 'production',
+    isStaging: env.VITE_APP_ENV === 'staging',
+    debug: env.VITE_APP_DEBUG,
+    maintenanceMode: env.VITE_APP_MAINTENANCE_MODE,
+    analyticsId: env.VITE_APP_ANALYTICS_ID,
   },
 }
