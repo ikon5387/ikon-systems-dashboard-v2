@@ -18,9 +18,6 @@ import {
   FiVolume2,
   FiMessageSquare,
   FiRefreshCw,
-  FiExternalLink,
-  FiSettings,
-  FiBarChart3,
 } from 'react-icons/fi'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'

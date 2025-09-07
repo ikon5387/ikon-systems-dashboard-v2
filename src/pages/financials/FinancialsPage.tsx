@@ -18,10 +18,7 @@ import {
   FiClock,
   FiXCircle,
   FiRefreshCw,
-  FiExternalLink,
-  FiSettings,
   FiCreditCard,
-  FiUsers,
 } from 'react-icons/fi'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'

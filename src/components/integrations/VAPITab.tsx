@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -33,11 +33,10 @@ export function VAPITab({
   calls, 
   loading, 
   onRefresh,
-  onCreateAgent,
   onMakeCall
 }: VAPITabProps) {
   const [showKeys, setShowKeys] = useState(false)
-  const [showCreateAgent, setShowCreateAgent] = useState(false)
+  const [_showCreateAgent, setShowCreateAgent] = useState(false)
   const [testCallNumber, setTestCallNumber] = useState('')
   const [selectedAgent, setSelectedAgent] = useState('')
 

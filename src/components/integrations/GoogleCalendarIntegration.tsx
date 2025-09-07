@@ -26,6 +26,7 @@ export function GoogleCalendarIntegration({ onStatusChange }: GoogleCalendarInte
   const [showKeys, setShowKeys] = useState(false)
   const [testing, setTesting] = useState(false)
   const [authenticated, setAuthenticated] = useState(false)
+  const [_loading, setLoading] = useState(false)
   const [stats, setStats] = useState({
     totalEvents: 0,
     upcomingEvents: 0,

@@ -144,7 +144,7 @@ class StripeServiceClass {
   private stripe: any = null
 
   constructor() {
-    this.publishableKey = config.stripe.publishableKey
+    this.publishableKey = config.integrations.stripe.publishableKey
     this.enabled = !!this.publishableKey
     this.initializeStripe()
   }
@@ -154,7 +154,7 @@ class StripeServiceClass {
 
     try {
       const { loadStripe } = await import('@stripe/stripe-js')
-      this.stripe = await loadStripe(this.publishableKey)
+      this.stripe = await loadStripe(this.publishableKey!)
     } catch (error) {
       console.error('Failed to initialize Stripe:', error)
     }
@@ -246,6 +246,10 @@ class StripeServiceClass {
 
   async getCustomers(): Promise<StripeResponse<Customer[]>> {
     return this.makeBackendRequest<Customer[]>('/customers', {})
+  }
+
+  async getPaymentHistory(customerId: string, limit: number = 10): Promise<StripeResponse<PaymentIntent[]>> {
+    return this.makeBackendRequest<PaymentIntent[]>(`/customers/${customerId}/payment-intents?limit=${limit}`, {})
   }
 
   async updateCustomer(

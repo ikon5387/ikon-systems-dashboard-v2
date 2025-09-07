@@ -150,19 +150,19 @@ html {
   }
   
   .dark-input {
-    @apply bg-background border-border text-foreground placeholder-muted-foreground focus:border-ring focus:ring-ring/20;
+    @apply bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:border-primary-500 focus:ring-primary-500/20;
   }
   
   .dark-button {
-    @apply bg-secondary border-border text-secondary-foreground hover:bg-accent hover:border-border;
+    @apply bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-600;
   }
   
   .dark-modal {
-    @apply bg-card border border-border;
+    @apply bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600;
   }
   
   .dark-sidebar {
-    @apply bg-card border-r border-border;
+    @apply bg-white dark:bg-slate-800 border-r border-slate-300 dark:border-slate-600;
   }
   
   /* Clean Interactive Elements */
@@ -172,12 +172,12 @@ html {
   
   /* Simple Border Styles */
   .clean-border {
-    @apply border border-border;
+    @apply border border-slate-200 dark:border-slate-700;
   }
   
   /* Minimalist Card Styles */
   .clean-card {
-    @apply bg-card border border-border shadow-sm;
+    @apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm;
   }
   
   /* Subtle Glow Effects */

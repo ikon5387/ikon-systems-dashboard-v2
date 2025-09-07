@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ActivityService, Activity, ActivityInsert } from '@/services/activity/ActivityService'
+import { ActivityService, ActivityInsert } from '@/services/activity/ActivityService'
 import { useAuth } from './useAuth'
 
 export function useRecentActivities(limit: number = 10) {

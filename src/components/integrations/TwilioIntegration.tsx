@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -14,7 +14,6 @@ import {
   Phone,
   Send,
   Users,
-  Globe
 } from 'lucide-react'
 import { TwilioService } from '@/services/integrations/TwilioService'
 import { notifications } from '@/lib/notifications'
@@ -27,7 +26,7 @@ export function TwilioIntegration({ onStatusChange }: TwilioIntegrationProps) {
   const [status, setStatus] = useState<'connected' | 'disconnected' | 'error' | 'testing'>('disconnected')
   const [showKeys, setShowKeys] = useState(false)
   const [testing, setTesting] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [_loading, setLoading] = useState(false)
   const [stats, setStats] = useState({
     totalMessages: 0,
     messagesSent: 0,

@@ -407,7 +407,7 @@ class GoogleCalendarServiceClass {
   }
 
   // Utility methods
-  formatDateTime(date: Date, timeZone?: string): string {
+  formatDateTime(date: Date, _timeZone?: string): string {
     return date.toISOString()
   }
 

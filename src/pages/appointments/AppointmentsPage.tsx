@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useAppointments, useCreateAppointment, useUpdateAppointment, useDeleteAppointment } from '@/hooks/useAppointments'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Card, CardContent } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Badge } from '@/components/ui/Badge'
@@ -112,7 +112,7 @@ export function AppointmentsPage() {
   }
 
   // Sync appointment to Google Calendar
-  const syncAppointmentToGoogleCalendar = async (appointment: AppointmentWithClient) => {
+  const syncAppointmentToGoogleCalendar = async (_appointment: AppointmentWithClient) => {
     if (!googleCalendarConnected) {
       toast.error('Please connect to Google Calendar first')
       return

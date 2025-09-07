@@ -19,6 +19,7 @@ export interface SendSMSData {
 }
 
 export interface PhoneNumber {
+  id: string
   phoneNumber: string
   friendlyName: string
   capabilities: {
@@ -26,6 +27,9 @@ export interface PhoneNumber {
     sms: boolean
     mms: boolean
   }
+  status: string
+  region: string
+  countryCode: string
 }
 
 export interface TwilioResponse<T> {

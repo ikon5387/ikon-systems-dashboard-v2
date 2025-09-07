@@ -85,7 +85,7 @@ const navigationItems = [
   },
 ]
 
-export function Sidebar({ isOpen, onClose, isCollapsed = false, onToggleCollapse }: SidebarProps) {
+export function Sidebar({ isOpen, onClose, isCollapsed = false }: SidebarProps) {
   const location = useLocation()
 
   return (

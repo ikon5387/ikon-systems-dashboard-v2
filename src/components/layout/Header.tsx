@@ -24,7 +24,7 @@ interface HeaderProps {
   isDesktopCollapsed?: boolean
 }
 
-export function Header({ onSidebarToggle, onDesktopToggle, isDesktopCollapsed }: HeaderProps) {
+export function Header({ onSidebarToggle, onDesktopToggle }: HeaderProps) {
   const { user, profile, signOut } = useAuth()
   const { theme, setTheme } = useTheme()
   const navigate = useNavigate()

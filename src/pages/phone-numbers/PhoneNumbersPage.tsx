@@ -1,22 +1,17 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { 
-  FiPlus, 
   FiSearch, 
-  FiEdit, 
-  FiTrash2, 
   FiPhone,
   FiMessageSquare,
   FiRefreshCw,
-  FiExternalLink,
-  FiSettings,
   FiCheckCircle,
   FiXCircle,
-  FiAlertTriangle,
   FiEye,
   FiEyeOff,
   FiSend,
   FiVolume2,
-  FiGlobe
+  FiGlobe,
+  FiExternalLink
 } from 'react-icons/fi'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -25,22 +20,8 @@ import { Badge } from '@/components/ui/Badge'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { useAuth } from '@/hooks/useAuth'
-import { TwilioService } from '@/services/integrations/TwilioService'
+import { TwilioService, PhoneNumber } from '@/services/integrations/TwilioService'
 import { notifications } from '@/lib/notifications'
-
-interface PhoneNumber {
-  id: string
-  phoneNumber: string
-  friendlyName: string
-  capabilities: {
-    voice: boolean
-    sms: boolean
-    mms: boolean
-  }
-  status: string
-  region: string
-  countryCode: string
-}
 
 export function PhoneNumbersPage() {
   const { isAuthenticated } = useAuth()
@@ -49,8 +30,8 @@ export function PhoneNumbersPage() {
   const [loading, setLoading] = useState(false)
   const [twilioConnected, setTwilioConnected] = useState(false)
   const [showKeys, setShowKeys] = useState(false)
-  const [deletingNumber, setDeletingNumber] = useState<PhoneNumber | null>(null)
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [_deletingNumber, setDeletingNumber] = useState<PhoneNumber | null>(null)
   const [activeTab, setActiveTab] = useState<'numbers' | 'twilio'>('numbers')
 
   const twilioService = TwilioService
@@ -88,7 +69,7 @@ export function PhoneNumbersPage() {
 
   const sendTestSMS = async (phoneNumber: string) => {
     try {
-      const response = await twilioService.sendSMS(phoneNumber, 'Test message from Ikon Systems Dashboard')
+      const response = await twilioService.sendSMS({ to: phoneNumber, message: 'Test message from Ikon Systems Dashboard' })
       if (response.success) {
         notifications.success('Test SMS sent successfully')
       } else {
@@ -336,14 +317,14 @@ export function PhoneNumbersPage() {
               <div className="flex items-center gap-3">
                 {twilioConnected ? (
                   <>
-                    <CheckCircle className="w-5 h-5 text-green-500" />
+                    <FiCheckCircle className="w-5 h-5 text-green-500" />
                     <Badge className="bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300">
                       Connected
                     </Badge>
                   </>
                 ) : (
                   <>
-                    <XCircle className="w-5 h-5 text-red-500" />
+                    <FiXCircle className="w-5 h-5 text-red-500" />
                     <Badge className="bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300">
                       Not Connected
                     </Badge>
@@ -473,7 +454,7 @@ export function PhoneNumbersPage() {
                   'Message History'
                 ].map((feature, index) => (
                   <div key={index} className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <FiCheckCircle className="w-4 h-4 text-green-500" />
                     <span className="text-sm">{feature}</span>
                   </div>
                 ))}
@@ -501,3 +482,5 @@ export function PhoneNumbersPage() {
     </div>
   )
 }
+
+export default PhoneNumbersPage

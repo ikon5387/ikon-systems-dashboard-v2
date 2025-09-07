@@ -431,10 +431,13 @@ class VAPIServiceClass {
 
   async makeCall(agentId: string, phoneNumber: string): Promise<VAPIResponse<{ callId: string }>> {
     return this.makeRequest<{ callId: string }>('/call', {
-      assistantId: agentId,
-      customer: {
-        number: phoneNumber
-      }
+      method: 'POST',
+      body: JSON.stringify({
+        assistantId: agentId,
+        customer: {
+          number: phoneNumber
+        }
+      })
     })
   }
 

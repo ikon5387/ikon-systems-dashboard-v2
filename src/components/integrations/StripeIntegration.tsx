@@ -27,6 +27,7 @@ export function StripeIntegration({ onStatusChange }: StripeIntegrationProps) {
   const [status, setStatus] = useState<'connected' | 'disconnected' | 'error' | 'testing'>('disconnected')
   const [showKeys, setShowKeys] = useState(false)
   const [testing, setTesting] = useState(false)
+  const [_loading, setLoading] = useState(false)
   const [stats, setStats] = useState({
     totalCustomers: 0,
     totalRevenue: 0,
