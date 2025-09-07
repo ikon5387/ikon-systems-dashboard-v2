@@ -415,7 +415,7 @@ export function AppointmentsPage() {
           </div>
         </CardContent>
       </Card>
-        </>
+      </>
       )}
 
       {activeTab === 'google-calendar' && (
